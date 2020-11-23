@@ -1,0 +1,96 @@
+深度森林：
+
+
+定义初始（self，shape_1X=None，n_mgsRFtree=30，window=None，stride=1，cascade_test_size=0.2，n_cascadeRF=2，n_cascadeRFtree=101，cascade_层=np.inf，
+最小采样数mgs=0.1，最小采样数级联=0.05，公差=0.0，n个作业=1）：              “gcForest分类器。              ：param shape_1X:int或元组列表或np.数组（默认设置为无）              
+单个样本元素的形状[n_线，n_线]。调用mg U扫描时需要！              对于序列数据，可以给出一个int。              ：param n_mgsRFtree:int（默认值=30）              
+多粒扫描期间随机森林中的树数。
+              ：param window:int（默认值=无）              多粒度扫描期间要使用的窗口大小列表。              如果“无”，则不进行切片。              
+：param步长：int（默认值=1）              切片数据时使用的步骤。              ：param cascade_test_size:float或int（默认值=0.2）             
+ 用于级联训练集拆分的拆分分数或绝对数。              ：param n_cascadeRF:int（默认值=2）              层叠层中随机森林的数量。              
+为每个伪随机林创建一个完整的随机林，因此              一层中随机森林的总数将是2*núcascadrf。              ：param n_cascadeRFtree:int（默认值=101）             
+ 层叠层中单个随机森林中的树数。              ：param min_samples_mgs:float或int（默认值=0.1）              节点中执行拆分的最小样本数              在多粒扫描随机林的训练中。             
+ 如果int number_of_samples=int。              如果浮点，min样本代表初始NL样本的分数。              ：param min_samples_cascade:float或int（默认值=0.1）              
+节点中执行拆分的最小样本数              在梯级随机林的训练中。              如果int number_of_samples=int。              如果浮点，min样本代表初始NL样本的分数。              
+：param cascade_layer:int（默认值=np.inf公司)              最大允许层叠层数。              有助于限制级联的构造。              ：param公差：float（默认值=0.0）              
+卡萨卡德生长的准确度公差。              如果精度的提高不超过公差，则结构              停止。              ：param n_jobs:int（默认值=1）              为任意随机林拟合和预测而并行运行的作业数。              
+如果-1，则作业数设置为核心数。
+
+
+#初始化参数
+def __init__(self, shape_1X=None, n_mgsRFtree=30, window=None, stride=1,
+                 cascade_test_size=0.2, n_cascadeRF=2, n_cascadeRFtree=101, cascade_layer=np.inf,
+                 min_samples_mgs=0.1, min_samples_cascade=0.05, tolerance=0.0, n_jobs=1):
+        """ gcForest Classifier.
+
+        :param shape_1X: int or tuple list or np.array (default=None)
+            Shape of a single sample element [n_lines, n_cols]. Required when calling mg_scanning!
+            For sequence data a single int can be given.
+
+        :param n_mgsRFtree: int (default=30)
+            Number of trees in a Random Forest during Multi Grain Scanning.
+
+        :param window: int (default=None)
+            List of window sizes to use during Multi Grain Scanning.
+            If 'None' no slicing will be done.
+
+        :param stride: int (default=1)
+            Step used when slicing the data.
+
+        :param cascade_test_size: float or int (default=0.2)
+            Split fraction or absolute number for cascade training set splitting.
+
+        :param n_cascadeRF: int (default=2)
+            Number of Random Forests in a cascade layer.
+            For each pseudo Random Forest a complete Random Forest is created, hence
+            the total numbe of Random Forests in a layer will be 2*n_cascadeRF.
+
+        :param n_cascadeRFtree: int (default=101)
+            Number of trees in a single Random Forest in a cascade layer.
+
+        :param min_samples_mgs: float or int (default=0.1)
+            Minimum number of samples in a node to perform a split
+            during the training of Multi-Grain Scanning Random Forest.
+            If int number_of_samples = int.
+            If float, min_samples represents the fraction of the initial n_samples to consider.
+
+        :param min_samples_cascade: float or int (default=0.1)
+            Minimum number of samples in a node to perform a split
+            during the training of Cascade Random Forest.
+            If int number_of_samples = int.
+            If float, min_samples represents the fraction of the initial n_samples to consider.
+
+        :param cascade_layer: int (default=np.inf)
+            mMximum number of cascade layers allowed.
+            Useful to limit the contruction of the cascade.
+
+        :param tolerance: float (default=0.0)
+            Accuracy tolerance for the casacade growth.
+            If the improvement in accuracy is not better than the tolerance the construction is
+            stopped.
+
+        :param n_jobs: int (default=1)
+            The number of jobs to run in parallel for any Random Forest fit and predict.
+            If -1, then the number of jobs is set to the number of cores.
+        """
+        setattr(self, 'shape_1X', shape_1X)
+        setattr(self, 'n_layer', 0)
+        setattr(self, '_n_samples', 0)
+        setattr(self, 'n_cascadeRF', int(n_cascadeRF))
+        if isinstance(window, int):
+            setattr(self, 'window', [window])
+        elif isinstance(window, list):
+            setattr(self, 'window', window)
+        setattr(self, 'stride', stride)
+        setattr(self, 'cascade_test_size', cascade_test_size)
+        setattr(self, 'n_mgsRFtree', int(n_mgsRFtree))
+        setattr(self, 'n_cascadeRFtree', int(n_cascadeRFtree))
+        setattr(self, 'cascade_layer', cascade_layer)
+        setattr(self, 'min_samples_mgs', min_samples_mgs)
+        setattr(self, 'min_samples_cascade', min_samples_cascade)
+        setattr(self, 'tolerance', tolerance)
+        setattr(self, 'n_jobs', n_jobs)
+
+
+
+

@@ -1,0 +1,156 @@
+一、SVM 怎样能得到好的结果 
+1. 对数据做归一化（simple scaling） 
+2. 应用 RBF kernel 
+3. 用cross-validation和grid-search 得到最优的c和g 
+4. 用得到的最优c和g训练训练数据 
+5. 测试
+
+二 、sklearn.svm.SVC 参数选择
+参数：
+1） C：C-SVC的惩罚参数C，默认值是1.0
+
+C越大，相当于惩罚松弛变量，希望松弛变量接近0，即对误分类的惩罚增大，趋向于对训练集全分对的情况，这样对训练集测试时准确率很高，但泛化能力弱。C值小，对误分类的惩罚减小，允许容错，将他们当成噪声点，泛化能力较强。
+
+2） kernel ：核函数，默认是rbf，可以是‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’ 
+
+  　　0 – 线性：u'v
+
+ 　　 1 – 多项式：(gamma*u'*v + coef0)^degree
+
+  　　2 – RBF函数：exp(-gamma|u-v|^2)
+
+  　　3 –sigmoid：tanh(gamma*u'*v + coef0)
+
+3）degree ：多项式poly函数的维度，默认是3，选择其他核函数时会被忽略。
+
+4）gamma ： ‘rbf’,‘poly’ 和‘sigmoid’的核函数参数。默认是’auto’，则会选择1/n_features
+
+5）coef0 ：核函数的常数项。对于‘poly’和 ‘sigmoid’有用。
+
+6）probability ：是否采用概率估计？.默认为False
+
+7）shrinking ：是否采用shrinking heuristic方法，默认为true
+
+8）tol ：停止训练的误差值大小，默认为1e-3
+
+9）cache_size ：核函数cache缓存大小，默认为200
+
+10）class_weight ：类别的权重，字典形式传递。设置第几类的参数C为weight*C(C-SVC中的C)
+
+11）verbose ：允许冗余输出？
+
+12）max_iter ：最大迭代次数。-1为无限制。
+
+13）decision_function_shape ：‘ovo’, ‘ovr’ or None, default=None3
+
+14）random_state ：数据洗牌时的种子值，int值
+
+主要调节的参数有：C、kernel、degree、gamma、coef0。
+
+
+默认API
+SVC(C=1.0, kernel=’rbf’, degree=3, gamma=’auto_deprecated’, coef0=0.0, shrinking=True, probability=False, tol=0.001, cache_size=200, class_weight=None, verbose=False, max_iter=-1, decision_function_shape=’ovr’, random_state=None
+
+C=1.0,  #outliers的惩罚系数，c越大，越不能容忍出现误差，容易过拟合；C越小，容易欠拟合，默认是1.0
+kernel=’rbf’：核函数，default 'rbf', ['linear','poly','rbf','sigmoid','precomputed']
+degree=3,
+gamma=’auto_deprecated’,  #决定了数据映射到新的特征空间后的分布，gamma越大，支持向量越少，gamma越小，支持向量越多，1/k
+coef0=0.0, 
+shrinking=True,  #是否采用shrinking heuristic方法，默认为True
+probability=False,  #是否采用概率估计
+tol=0.001,  #停止训练的误差值大小
+cache_size=200,  #核函数cache缓存大小
+class_weight=None,  #类别的权重，字典形式传递。设置第几类的参数C为weight*C(C-SVC中的C)
+verbose=False, 
+max_iter=-1, 最大迭代次数
+decision_function_shape=’ovr’,  #‘ovo','ovr', or None
+random_state=None #数据洗牌时的种子值
+
+linear: 没有gamma, coef0
+poly: degree, gamma=1/k, coef0=0
+rbf: gamma=1/k, coef0=0
+sigmoid:gamma=1/k, coef0=0
+
+ 
+
+主要调节的参数有：C、kernel、degree、gamma、coef0
+
+调参的时候，根部kernel分开调参
+
+比如，先设置kernel=‘rbf’，调节[C, gamma]
+
+再设置kernel='linear'，调节[C]
+
+再设置kernel=' poly', 调节[C, gamma, degree]
+
+
+
+三、关于svm的C以及核函数参数设置
+
+1、 C的选择
+C一般可以选择为：10^t , t=[- 4，4]就是0.0001 到10000。选择的越大，表示对错误例惩罚程度越大，可能会导致模型过拟合
+
+2、常见核函数及其选择
+0）线性核函数 （无其他参数） 
+1）多项式核函数 （重点是阶数的选择，即d，一般选择1-11：1 3 5 7 9 11，也可以选择2,4，6…） 
+2）RBF核函数 （径向基RBF内核，exp{-|xi-xj|^2/均方差}，其中均方差反映了数据波动的大小。
+gamma参数通常可选择下面几个数的倒数：0.1 0.2 0.4 0.6 0.8 1.6 3.2 6.4 12.8，默认的是类别数的倒数，即1/k，2分类的话就是0.5） 
+3）sigmoid核函数 又叫做S形内核 
+两个参数g以及r：g一般可选1 2 3 4，r选0.2 0.4 0.6 0.8 1 
+4）自定义核函数
+
+3、核函数的参数：
+1）对于线性核函数，没有专门需要设置的参数 
+2）对于多项式核函数，有三个参数。-d用来设置多项式核函数的最高此项次数，也就是公式中的d，默认值是3。
+-g用来设置核函数中的gamma参数设置，也就是公式中的第一个r(gamma)，默认值是1/k（k是类别数）。
+-r用来设置核函数中的coef0，也就是公式中的第二个r，默认值是0。 
+3）对于RBF核函数，有一个参数。-g用来设置核函数中的gamma参数设置，也就是公式中的第一个r(gamma)，默认值是1/k（k是类别数）。 
+4）对于sigmoid核函数，有两个参数。-g用来设置核函数中的gamma参数设置，也就是公式中的第一个r(gamma)，默认值是1/k（k是类别数）。
+-r用来设置核函数中的coef0，也就是公式中的第二个r，默认值是0。
+
+四、关于cost和gamma
+
+SVM模型有两个非常重要的参数C与gamma。
+
+ C是惩罚系数，：即对误差的宽容度。c越高，说明越不能容忍出现误差,容易过拟合。C越小，容易欠拟合。C过大或过小，泛化能力变差
+gamma是选择RBF函数作为kernel后，该函数自带的一个参数。：隐含地决定了数据映射到新的特征空间后的分布，gamma越大，支持向量越少，gamma值越小，支持向量越多。支持向量的个数影响训练与预测的速度。
+
+我们通过公式可知，gamma 是一个常量，而且是一个线性的因数。所以大家可以想象，gamma的作用，其实就是控制数据在向高维度投影后的缩放比例。如果 gamma 很大，那么上图的点就会离切面很远。如果 gamma 很小，上图的点就会离切面很近。
+而这个缩放比例就会影响线性分割面的运算结果（不同的loss function对距离的惩罚度不一样）。这也是SVM对数据 Scaling 和 Normalization 是敏感的原因之一。因为最后都是算的一个 Linear Model
+这就是为什么，有人说如果原始数据比较分散，gamma可以小一点。反之，如果原始数据很密集，gamma可以大一点。当然，这不是绝对的，所以我们才要做 GridSearch
+通常我们会 0.01、0.1、1、10、100 ... 这样指数级地搜索一个比较好的 gamma
+
+Grid Search ：使用grid Search虽然比较简单，而且看起来很naïve。但是他确实有两个优点： 可以得到全局最优 ，(C,gamma)相互独立，便于并行化进行
+
+
+五、SVM有如下主要几个特点：
+
+(1)非线性映射是SVM方法的理论基础,SVM利用内积核函数代替向高维空间的非线性映射；
+(2)对特征空间划分的最优超平面是SVM的目标,最大化分类边际的思想是SVM方法的核心；
+(3)支持向量是SVM的训练结果,在SVM分类决策中起决定作用的是支持向量；
+(4)SVM 是一种有坚实理论基础的新颖的小样本学习方法。 
+它基本上不涉及概率测度及大数定律等,因此不同于现有的统计方法。 
+从本质上看,它避开了从归纳到演绎的传统过程,实现了高效的从训练样本到预报样本的“转导推理”,大大简化了通常的分类和回归等问题；
+(5)SVM 的最终决策函数只由少数的支持向量所确定,计算的复杂性取决于支持向量的数目,而不是样本空间的维数,这在某种意义上避免了“维数灾难”。
+(6)少数支持向量决定了最终结果,这不但可以帮助我们抓住关键样本、“剔除”大量冗余样本,而且注定了该方法不但算法简单,而且具有较好的“鲁棒”性。 
+这种“鲁棒”性主要体现在: 
+①增、删非支持向量样本对模型没有影响; 
+②支持向量样本集具有一定的鲁棒性; 
+③有些成功的应用中,SVM 方法对核的选取不敏感
+
+
+六、两个不足：
+
+(1) SVM算法对大规模训练样本难以实施 
+由于SVM是借助二次规划来求解支持向量，而求解二次规划将涉及m阶矩阵的计算（m为样本的个数），当m数目很大时该矩阵的存储和计算将耗费大量的机器内存和运算时间。
+2) 用SVM解决多分类问题存在困难 
+经典的支持向量机算法只给出了二类分类的算法，而在数据挖掘的实际应用中，一般要解决多类的分类问题。可以通过多个二类支持向量机的组合来解决。主要有一对多组合模式、一对一组合模式和SVM决策树；
+再就是通过构造多个分类器的组合来解决。
+主要原理是克服SVM固有的缺点，结合其他算法的优势，解决多类问题的分类精度。如：与粗集理论结合，形成一种优势互补的多类问题的组合分类器.
+
+
+
+
+
+
+
